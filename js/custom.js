@@ -85,12 +85,12 @@
 		return Math.floor(Math.random() * (max - min)) + min
 	}
 
-	function isPlayerNameValid(name){
+	function validateInput(name, playImmediately){
 		let playerExists = false;
 
 		if(getPlayers()){
 			playerExists = getPlayers().find(player => { 
-				return (player.name === name)
+				return playImmediately === null ? (player.name === name)  : (player.name === name && player.willingToPlayASAP === playImmediately)
 			});
 		}
 		
@@ -133,13 +133,18 @@
 		// Get input values
 		// Added checking if player exists
 		let name = document.getElementById("nameInput").value;
-		let validationResult = isPlayerNameValid(name);
+		let validationResult = validateInput(name, null);
 		if(validationResult.result === false){
-			alert(validationResult.message)
+			Swal.fire({
+				title: "Player already inputted",
+				text: "WAG MO PINDUTIN SI ANGER",
+				imageUrl: "./images/anger.gif",
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "May ganyan na 2ll"
+			});
 		}
 		else {
-			// Get the table and insert a new row at the end
-			let table = document.getElementById("playersTable");
 			let action = '<button type="button" class="clr-primary" onclick="editPlayer(this)"><i class="mdi mdi-pencil"></i></button> &nbsp;' +
 				'<button type="button" class="clr-primary" onclick="deletePlayer(this)"><i class="mdi mdi-delete"></i></button>';
 
@@ -166,6 +171,7 @@
 		let playImmediately = row.cells[2].innerHTML === "Yes";
 		$("#playerNameInput").data("prevInput",name)
 		$("#playerNameInput").val(name);
+		$("#playImmediately").data("prevInput", playImmediately);
 		$("#playImmediately").prop("checked", playImmediately);
 		$("#playerModal").modal("show");
 	
@@ -175,15 +181,15 @@
 		let nameInput = $("#playerNameInput").val();
 		let prevInput = $("#playerNameInput").data("prevInput");
 		let playImmediately =  $("#playImmediately").prop('checked');
-		let validationResult = isPlayerNameValid(nameInput);
-		if(validationResult.result === false){			
+		let validateResult = validateInput(nameInput, playImmediately);
+		if(validateResult.result === false){			
 			Swal.fire({
-				title: "Player already existing",
+				title: "No change in player details",
 				text: "WAG MO PINDUTIN SI ANGER",
 				imageUrl: "./images/anger.gif",
 				imageWidth: 200,
 				imageHeight: 200,
-				imageAlt: "Eyy ka muna"
+				imageAlt: "May ganyan na 2ll"
 			});
 		}
 		else{

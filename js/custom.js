@@ -140,17 +140,15 @@
 		else {
 			// Get the table and insert a new row at the end
 			let table = document.getElementById("playersTable");
-			let action = '<button type="button" class="clr-primary" onclick="addCount(this)"><i class="mdi mdi-plus"></i></button> &nbsp;' +
-				'<button type="button" class="clr-primary" onclick="subtractCount(this)"><i class="mdi mdi-minus"></i></button> &nbsp;' +
-				'<button type="button" class="clr-primary" onclick="editPlayer(this)"><i class="mdi mdi-pencil"></i></button> &nbsp;' +
+			let action = '<button type="button" class="clr-primary" onclick="editPlayer(this)"><i class="mdi mdi-pencil"></i></button> &nbsp;' +
 				'<button type="button" class="clr-primary" onclick="deletePlayer(this)"><i class="mdi mdi-delete"></i></button>';
 
 			// Insert to players array then set to playersData in localStorage
 			let playerInfo = { 
 				'name' : name,
 				'matchesPlayedCount' : 0,
-				'willingToPlayASAP' : Math.random() < 0.5,
-				'playedRecently' : Math.random() < 0.5,
+				'willingToPlayASAP' : $("#addPlayerPlayImmediately").prop('checked'),
+				'playedRecently' : false,
 				'actions' : action
 			}
 			players.push(playerInfo);
@@ -161,46 +159,61 @@
 		}  
 	}
 
-	function editPlayer(button) {
+	function editPlayer(button) {	
 		// Get the parent row of the clicked button
 		let row = button.parentNode.parentNode;
+		let name = row.cells[0].innerHTML;
+		let playImmediately = row.cells[2].innerHTML === "Yes";
+		$("#playerNameInput").data("prevInput",name)
+		$("#playerNameInput").val(name);
+		$("#playImmediately").prop("checked", playImmediately);
+		$("#playerModal").modal("show");
+	
+	}
 
-		// Get the cells within the row
-		let nameCell = row.cells[0];
-		let prevName = nameCell.innerHTML;
-
-		// Prompt the user to enter updated values
-		// Added validation to prevent same name
-		let nameInput =
-			prompt("Enter the updated name:",
-				nameCell.innerHTML);
-
+	function saveChanges(){
+		let nameInput = $("#playerNameInput").val();
+		let prevInput = $("#playerNameInput").data("prevInput");
+		let playImmediately =  $("#playImmediately").prop('checked');
 		let validationResult = isPlayerNameValid(nameInput);
-
-		if(validationResult.result === false){
-			alert(validationResult.message)
+		if(validationResult.result === false){			
+			Swal.fire({
+				title: "Player already existing",
+				text: "WAG MO PINDUTIN SI ANGER",
+				imageUrl: "./images/anger.gif",
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Eyy ka muna"
+			});
 		}
 		else{
 			players = players.map((player) => {
-				if(player.name === prevName){
+				if(player.name === prevInput){
 					player.name = nameInput;
+					player.willingToPlayASAP = playImmediately;
 				}
 				return player;
-
 			})
 			// Update localStorage
 			localStorage.setItem("playersData", JSON.stringify(players));
 			// Update UI
 			reloadPlayersTable();
-		}		
+			Swal.fire({
+				title: "Player added successfully",
+				text: "Eyy ka muna, EYYY",
+				imageUrl: "./images/eyy.gif",
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Eyy ka muna"
+			});
+			$("#playerModal").modal("hide");
+		}	
 	}
 
 	function deletePlayer(button) {
 		// Get the parent row of the clicked button
 		let row = button.parentNode.parentNode;
 		let nameCell = row.cells[0];
-
-		console.log(nameCell.innerHTML);
 		if (confirm('Ligwakin na si ' + nameCell.innerHTML + '?')) {
 			$(".player-dropdown option[value='" + nameCell.innerHTML + "']").remove();
 			players = players.filter(player => {
@@ -211,10 +224,17 @@
 
 			// Update localStorage
 			localStorage.setItem("playersData", JSON.stringify(players));
-
+			Swal.fire({
+				title: "Player deleted",
+				text: "Bye lodi, you will be missed",
+				imageUrl: "./images/bye.gif",
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Bye lodi"
+			});
 			// Update UI
 			reloadPlayersTable();
-			alert('Bye.');
+
 
 		}
 	}
@@ -235,76 +255,83 @@
 
 	function generateMatchUp(){
 		// Initialize Variable Match ups
+
 		let generatedNumbers = [];
 		let generatedPlayers = [];
 		let prevPlayers = (games.length > 0) ? games[games.length - 1] : [];
 		let players = getPlayers();
 		let i=0;
 
-
-		// Filter players removing previous players
-		let filteredPlayers = players.filter(function(player){
-    
-			// Check if players in previous players
-			// Else return player
-            
-			if(prevPlayers.includes(player.name)){
-				// Check if player is willing to play ASAP
-				// If willing to play ASAP check if player did not play recently
-				// Else remove player by skipping
-				if(player.willingToPlayASAP){
-					// Check if player did play recently
-					// If played recently, return player for eligibility to play again
-					// Else return player
-					if(player.playedRecently){
-                        // Check if played 2 consecutive matches. If not return player
-                        if((player.matchesPlayedCount > 1) && (player.matchesPlayedCount % 2 == 1)){
-                            return player
-                        }
+		if(players.length > 3){
+			// Filter players removing previous players
+			let filteredPlayers = players.filter(function(player){
+		
+				// Check if players in previous players
+				// Else return player
+				
+				if(prevPlayers.includes(player.name)){
+					// Check if player is willing to play ASAP
+					// If willing to play ASAP check if player did not play recently
+					// Else remove player by skipping
+					if(player.willingToPlayASAP){
+						// Check if player did play recently
+						// If played recently, return player for eligibility to play again
+						// Else return player
+						if(player.playedRecently){
+							// Check if played 2 consecutive matches. If not return player
+							if((player.matchesPlayedCount > 1) && (player.matchesPlayedCount % 2 == 1)){
+								return player
+							}
+						}
+						else{
+							return player;
+						}
 					}
-                    else{
-						return player;
-                    }
+				}
+				else{
+					return player;
+				}
+			})
+
+			// Get 4 random players based on filtered list
+			while(i <= 3){
+
+				console.log(players.length, filteredPlayers.length)
+				
+				// generate random number 
+				let rowLength = filteredPlayers.length > 3 ? filteredPlayers.length : players.length;
+				let generatedNumber =getRandomNumber(0, rowLength);
+				// check if in generatedNumbers list
+				if(generatedNumbers.includes(generatedNumber)){
+					// if true, generate a new number
+					generatedNumber = getRandomNumber(0, rowLength);
+				}
+				else{
+					// else push to generatedNumbers list and push to generatedPlayers list
+					// repeat until 4
+
+					// if less than 8 players, repush from players list but avoid duplicates 
+					if(filteredPlayers.length < 4){
+						generatedNumber =  getRandomNumber(0, players.length);
+						if(!generatedPlayers.includes(players[generatedNumber]['name']) && generatedPlayers.length > 3){
+							console.log("HEREE",players[generatedNumber]['name']);
+							generatedPlayers.push(players[generatedNumber]['name']);
+						}
+						else{
+							break;
+						}
+					}
+					else{
+						console.log("TER");
+						generatedNumbers.push(generatedNumber);
+						generatedPlayers.push(filteredPlayers[generatedNumber]['name']);                     
+						i++;
+					}
 				}
 			}
-			else{
-                return player;
-			}
-		})
+			setDropdownPlayers(generatedPlayers);
+		} 
 
-		// Get 4 random players based on filtered list
-		while(i <= 3){
-
-			// generate random number
-			let generatedNumber = getRandomNumber(0, filteredPlayers.length);
-
-			// check if in generatedNumbers list
-			if(generatedNumbers.includes(generatedNumber)){
-				// if true, generate a new number
-				generatedNumber = getRandomNumber(0, filteredPlayers.length);
-			}
-			else{
-				// else push to generatedNumbers list and push to generatedPlayers list
-				// repeat until 4
-
-                // if less than 8 players, repush from players list but avoid duplicates 
-                if(filteredPlayers.length < 4){
-                    generatedNumber =  getRandomNumber(0, players.length);
-                    if(!generatedPlayers.includes(players[generatedNumber]['name'])){
-                        generatedPlayers.push(players[generatedNumber]['name']);
-                    }
-                    else{
-                        continue;
-                    }
-                }
-                else{
-                    generatedNumbers.push(generatedNumber);
-                    generatedPlayers.push(filteredPlayers[generatedNumber]['name']);                     
-                    i++;
-                }
-			}
-		}
-		setDropdownPlayers(generatedPlayers);
 	}
 
 	function setDropdownPlayers(players){

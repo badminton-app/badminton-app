@@ -73,7 +73,10 @@
 								</div>
 								<div>
 									<div class="card-body">
-										<div class="input-group mb-2">
+										<div class="form-check">
+											<input class="form-check-input" type="checkbox" id="addPlayerPlayImmediately"> <label for="addPlayerPlayImmediately" data-toggle="tooltip" data-placement="top" title="Ipalick mo to bago mag add kung gusto mo ihi lang pahinga">Play Immediately?</label>
+										</div>
+										<div class="input-group mb-3">
 											<input type="text" class="form-control" id="nameInput" placeholder="Enter player name . . .">
 											<button type="button" class="btn btn-outline-primary btn-sm" onclick="addPlayer()"><span class="mdi mdi-account-plus"> </span> Add New Player</button>
 										</div>
@@ -104,7 +107,7 @@
 											<td style="width:85%;text-align:right;">
 												<button type="button" class="btn btn-outline-secondary" onclick="generateMatchUp()" data-toggle="tooltip" data-placement="top" title="Generate matchup"><span class="mdi mdi-repeat"></span></button>
 												<button type="button" class="btn btn-outline-warning" onclick="saveMatch()" data-toggle="tooltip" data-placement="top" title="Mark match as done"><i class="mdi mdi-check"></i></button>
-												<button type="button" class="btn btn-outline-danger" onclick="clearPlayers('set1')"><i class="mdi mdi-delete"></i></button>
+												<button type="button" class="btn btn-outline-danger" onclick="clearPlayers()"><i class="mdi mdi-delete"></i></button>
 											</td>
 										</tr>
 									</table>
@@ -162,6 +165,26 @@
 						</div>
 					</div>		  
 				</div>
+				<div class="modal fade" id="playerModal" tabindex="-1" aria-hidden="true">
+					<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Player Info</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<label for="exampleDataList" class="form-label">Name : </label>
+							<input class="form-control" type="text" placeholder="Enter name" id="playerNameInput">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" id="playImmediately">Play Immediately?
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+						</div>
+					</div>
+					</div>
+				</div>
 				<!-- content-wrapper ends -->
 				<!-- partial:partials/_footer.html -->
 				<footer class="footer">
@@ -184,6 +207,7 @@
 <script src="js/template.js"></script>
 <script src="js/jquery.cookie.js" type="text/javascript"></script>
 <script src="js/dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/2.1.4/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/responsive/3.0.3/js/responsive.dataTables.js"></script>
 <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.js"></script>

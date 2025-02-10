@@ -11,6 +11,7 @@
             {
 				data: 'willingToPlayASAP',
 				title : 'Play Immediately',
+				visible : false,
 				render: function(data, type){
 					return data === true ? "Yes" : "No"
 				}
@@ -18,6 +19,7 @@
 			{
 				data: 'playedRecently',
 				title : 'Played Recently',
+				visible : false,
 				render: function(data, type){
 					return data === true ? "Yes" : "No"
 				}
@@ -36,17 +38,17 @@
 	let gamesTable = new DataTable('#gamesTable', {
 		fixedHeader: true,
 		dom: 'Bftip',
-		responsive: true,
         pageLength: 30,
 		columns: [
 			{
 				title : 'Match Number',
 				className : 'dt-body-center dt-center'
 			},
-            {title : 'Player Name'},
-            {title : 'Player Name'},
-            {title : 'Player Name'},
-            {title : 'Player Name'}
+            {title : 'Player Name', visible : false},
+            {title : 'Player Name', visible : false},
+            {title : 'Player Name', visible : false},
+            {title : 'Player Name', visible : false},
+			{title : 'Players', className : 'word-break'}
         ],  
 		data : getGames()
 	});
@@ -320,7 +322,6 @@
 					if(filteredPlayers.length < 4){
 						generatedNumber =  getRandomNumber(0, players.length);
 						if(!generatedPlayers.includes(players[generatedNumber]['name']) && generatedPlayers.length > 3){
-							console.log("HEREE",players[generatedNumber]['name']);
 							generatedPlayers.push(players[generatedNumber]['name']);
 						}
 						else{
@@ -367,12 +368,26 @@
             }
 			return player;
 		})
-
-		localStorage.setItem("playersData", JSON.stringify(players));
-		games.push(selectedPlayers);
-		localStorage.setItem('gamesData', JSON.stringify(games));
-		reloadGamesTable();
-		reloadPlayersTable();
+		let hasPlayers = selectedPlayers.slice(1,selectedPlayers.length).every(Boolean);
+		if(hasPlayers){
+			let stringifyPlayers = selectedPlayers.slice(1,selectedPlayers.length).join(', ');
+			selectedPlayers.push(stringifyPlayers);
+			localStorage.setItem("playersData", JSON.stringify(players));
+			games.push(selectedPlayers);
+			localStorage.setItem('gamesData', JSON.stringify(games));
+			reloadGamesTable();
+			reloadPlayersTable();
+		}
+		else{
+			Swal.fire({
+				title: "No players selected",
+				text: "WAG KANG MACOLET PLS",
+				imageUrl: "./images/anger.gif",
+				imageWidth: 200,
+				imageHeight: 200,
+				imageAlt: "Maglagay kang players ano ba?"
+			});
+		}
 	}
 
 	function clearInputs() {
